@@ -1,2 +1,5 @@
-# Experimenting with CoackroachDB to Create a Resilient Database Cluster
+# CockroachDB Lab
+
+Experimenting with CockroachDB to Create a Resilient Database Cluster
+
 
