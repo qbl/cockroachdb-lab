@@ -2,7 +2,49 @@
 
 Experimenting with CockroachDB to Create a Resilient Database Cluster
 
-# Steps
+# Running CockroachDB on Local Machine
+
+## 1. Install CockroachDB
+
+1. On Mac OS, we can use `brew` to install CockroachDB.
+
+    ```
+    brew install cockroach
+    ```
+
+## 2. Setup Local Cluster
+
+1. Start the first node.
+
+    ```
+    cockroach start --insecure --listen-addr=localhost
+    ```
+
+2. Add nodes to the cluster.
+
+    We are going to add two nodes to our CockroachDB cluster.
+
+    Node 2:
+    ```
+    cockroach start \
+    --insecure \
+    --store=node2 \
+    --listen-addr=localhost:26258 \
+    --http-addr=localhost:8081 \
+    --join=localhost:26257
+    ```
+
+    Node 3
+    ```
+    cockroach start \
+    --insecure \
+    --store=node3 \
+    --listen-addr=localhost:26259 \
+    --http-addr=localhost:8082 \
+    --join=localhost:26257
+    ```
+
+# Running CockroachDB on Kubernetes Cluster
 
 ## 1. Create a Kubernetes Cluster
 
