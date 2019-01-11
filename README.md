@@ -177,3 +177,12 @@ username and password that you want.
     ```
 
 2. Access from `localhost:8080`.
+
+
+# Experiments
+
+## 1. Node Failure
+
+## 2. Data Replication
+
+## 3. Fault Tolerance & Recovery
