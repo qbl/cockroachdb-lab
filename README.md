@@ -88,3 +88,82 @@ chart:
     kubectl certificate approve default.node.qbl-cockroach-cockroachdb-2
     kubectl certificate approve default.client.root
     ```
+
+## 3. Use Built-In SQL Client
+
+1. Create a client pod
+
+    Create `client-secure.yaml` pod definition as follow:
+
+    ```
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: cockroachdb-client-secure
+      labels:
+        app: cockroachdb-client
+    spec:
+      serviceAccountName: qbl-cockroach-cockroachdb
+      initContainers:
+      - name: init-certs
+        image: cockroachdb/cockroach-k8s-request-cert:0.4
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/bin/ash"
+        - "-ecx"
+        - "/request-cert -namespace=${POD_NAMESPACE} -certs-dir=/cockroach-certs -type=client -user=root -symlink-ca-from=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: client-certs
+          mountPath: /cockroach-certs
+      containers:
+      - name: cockroachdb-client
+        image: cockroachdb/cockroach:v2.1.3
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: client-certs
+          mountPath: /cockroach-certs
+        command:
+        - sleep
+        - "2147483648" # 2^31
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: client-certs
+        emptyDir: {}
+    ```
+
+    Create the pod:
+
+    ```
+    kubectl create -f client-secure.yaml
+    ```
+
+2. SSH into the client pod.
+
+    ```
+    kubectl exec -it cockroachdb-client-secure -- ./cockroach sql --certs-dir=/cockroach-certs --host=qbl-cockroach-cockroachdb-public
+    ```
+
+3. Try out some SQL commands.
+
+    ```
+    CREATE DATABASE bank;
+    CREATE TABLE bank.accounts (id INT PRIMARY KEY, balance DECIMAL);
+    INSERT INTO bank.accounts VALUES (1, 1000.50);
+    SELECT * FROM bank.accounts;
+    ```
+
+4. Create a user with a password.
+
+    Replace <username> and <password> in the following command with
+username and password that you want.
+
+    ```
+    CREATE USER <username> WITH PASSWORD '<password>';
+    ```
+
+5. Exit the SQL shell and pod with `\q` command.
