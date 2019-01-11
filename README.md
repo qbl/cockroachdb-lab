@@ -167,3 +167,13 @@ username and password that you want.
     ```
 
 5. Exit the SQL shell and pod with `\q` command.
+
+## 4. Accessing The Admin UI
+
+1. Port-forward from local machine.
+
+    ```
+    kubectl port-forward qbl-cockroach-cockroachdb-0 8080
+    ```
+
+2. Access from `localhost:8080`.
