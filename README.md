@@ -43,6 +43,55 @@ Experimenting with CockroachDB to Create a Resilient Database Cluster
     --http-addr=localhost:8082 \
     --join=localhost:26257
     ```
+# Experiments
+
+## 1. Data Replication
+
+1. Write data to the first node.
+
+    Generate an example intro database:
+    ```
+    cockroach workload init intro \
+    'postgresql://root@localhost:26257?sslmode=disable'
+    ```
+
+    Open the SQL client:
+    ```
+    cockroach sql --insecure --host=localhost:26257
+    ```
+
+    Verify that intro database exists:
+    ```
+    SHOW DATABASES;
+    SHOW TABLES FROM INTRO;
+    SELECT * FROM intro.mytable WHERE (l % 2) = 0;
+    \q
+    ```
+
+2. Open SQL client in the other nodes, and see if the data replicated to those nodes.
+
+    Node 2:
+    ```
+    cockroach sql --insecure --host=localhost:26258
+    SHOW DATABASES;
+    SHOW TABLES FROM INTRO;
+    SELECT * FROM intro.mytable WHERE (l % 2) = 0;
+    \q
+    ```
+
+    Node 3:
+    ```
+    cockroach sql --insecure --host=localhost:26259
+    SHOW DATABASES;
+    SHOW TABLES FROM INTRO;
+    SELECT * FROM intro.mytable WHERE (l % 2) = 0;
+    \q
+    ```
+
+
+## 2. Fault Tolerance & Recovery
+
+## 3. Automatic Rebalancing
 
 # Running CockroachDB on Kubernetes Cluster
 
@@ -219,12 +268,3 @@ username and password that you want.
     ```
 
 2. Access from `localhost:8080`.
-
-
-# Experiments
-
-## 1. Node Failure
-
-## 2. Data Replication
-
-## 3. Fault Tolerance & Recovery
