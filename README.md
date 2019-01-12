@@ -88,8 +88,58 @@ Experimenting with CockroachDB to Create a Resilient Database Cluster
     \q
     ```
 
-
 ## 2. Fault Tolerance & Recovery
+
+1. Remove a node temporarily.
+
+    ```
+    cockroach quit --insecure --host=localhost:26258
+    ```
+
+2. Verify that the cluster is not affected.
+
+    ```
+    cockroach sql --insecure --host=localhost:26259
+    SHOW DATABASES;
+    \q
+    ```
+
+3. Write new data while a node is offline.
+
+    Generate new sample workload:
+    ```
+    cockroach workload init startrek \
+    'postgresql://root@localhost:26257?sslmode=disable'
+    ```
+
+    Open SQL client and verify that new data is there:
+    ```
+    cockroach sql --insecure --host=localhost:26259
+    SHOW DATABASES;
+    SHOW TABLES FROM startrek;
+    SELECT * FROM startrek.eipsodes WHERE stardate > 5500;
+    ```
+
+4. Rejoin the previously removed node.
+
+    ```
+    cockroach start \
+    --insecure \
+    --store=node2 \
+    --listen-addr=localhost:26258 \
+    --http-addr=localhost:8081 \
+    --join=localhost:26257
+
+    ```
+
+5. Verify that the rejoined node catches up with the whole cluster.
+
+    ```
+    cockraoch sql --insecure --host=localhost:26258
+    SHOW DATABASES;
+    SHOW TABLES FROM startrek;
+    SELECT * FROM startrek.episodes WHERE stardate > 5500;
+    ```
 
 ## 3. Automatic Rebalancing
 
