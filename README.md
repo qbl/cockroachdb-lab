@@ -143,6 +143,37 @@ Experimenting with CockroachDB to Create a Resilient Database Cluster
 
 ## 3. Automatic Rebalancing
 
+1. Run a sample workload.
+
+    ```
+    cockroach workload init tpcc \
+    'postgresql://root@localhost:26257?sslmode=disable'
+    ```
+
+2. Add 2 more nodes.
+
+    Node 4:
+    ```
+    cockroach start \
+    --insecure \
+    --store=scale-node4 \
+    --listen-addr=localhost:26260 \
+    --http-addr=localhost:8083 \
+    --join=localhost:26257,localhost:26258,localhost:26259
+    ```
+
+    Node 5:
+    ```
+    cockroach start \
+    --insecure \
+    --store=scale-node5 \
+    --listen-addr=localhost:26261 \
+    --http-addr=localhost:8084 \
+    --join=localhost:26257,localhost:26258,localhost:26259
+    ```
+
+3. Watch in dashboard as the new nodes catch up their number of replicas.
+
 # Running CockroachDB on Kubernetes Cluster
 
 ## 1. Create a Kubernetes Cluster
